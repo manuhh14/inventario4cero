@@ -27,7 +27,7 @@ Categoria.getAll = () => {
 
 
 
-//BUSCAR POR NOMBRE DE LA CATEGORIA
+//BUSCAR POR NOMBRE DE LA CATEGORIA /////
 Categoria.buscarPorNombre = async (nombre) => {
   const sql = `
     SELECT * FROM categorias
