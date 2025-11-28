@@ -28,7 +28,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.set('x-powered-by', false);
 
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 app.use('/api/productos', producto);     //productos
 app.use('/api/categorias',categoria);    //categorias

@@ -1,18 +1,44 @@
 const express = require('express');
 const router = express.Router();
-const proveedorController = require('../controllers/proveedorController');
+const db = require('../config/config');
 
+// ================================
+// ✔ Crear proveedor
+// ================================
+router.post('/crearProveedor', async (req, res) => {
+    try {
+        const { nombre_proveedor, telefono_proveedor, email_proveedor, direccion_proveedor } = req.body;
 
+        const sql = `
+            INSERT INTO proveedores (nombre_proveedor, telefono_proveedor, email_proveedor, direccion_proveedor)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *;
+        `;
 
+        const result = await db.one(sql, [
+            nombre_proveedor,
+            telefono_proveedor,
+            email_proveedor,
+            direccion_proveedor
+        ]);
 
-// RUTAS
+        res.status(201).json({
+            success: true,
+            message: "Proveedor creado correctamente",
+            data: result
+        });
 
-router.post('/registrarProveedor', proveedorController.registrarProveedor);
-router.get('/getAllProveedor', proveedorController.getAllProveedor);
-router.get('/buscarPorNombre/:nombre', proveedorController.buscarPorNombre);
-router.get('/buscarPorId/:Id', proveedorController.buscarPorId);
-router.get('/eliminarPorId/:Id',proveedorController.eliminarPorId);
-router.put('/actualizarPorId/:id', proveedorController.actualizarPorId);
+    } catch (error) {
+        console.error("Error al crear proveedor:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error al crear proveedor",
+            error: error.message
+        });
+    }
+});
 
-
-module.exports= router;
+// ================================
+// EXPORTAR RUTAS
+// ================================
+module.exports = router;
