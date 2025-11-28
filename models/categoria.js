@@ -18,7 +18,7 @@ Categoria.registrarCategoria = async (datos) => {
 
 
 
-//OBTENER TODAS LAS CATEGORIAS
+//OBTENER TODAS LAS CATEGORIAS ////
 Categoria.getAll = () => {
     const sql = 'SELECT * FROM public.categorias';
     return db.manyOrNone(sql);
