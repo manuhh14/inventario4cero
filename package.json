@@ -1,0 +1,38 @@
+{
+  "name": "inventario2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Diian1105/inventario2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Diian1105/inventario2/issues"
+  },
+  "homepage": "https://github.com/Diian1105/inventario2#readme",
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "bwip-js": "^4.7.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "http": "^0.0.1-security",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.0",
+    "nodemon": "^3.1.10",
+    "pg-promise": "^11.13.0",
+    "qrcode": "^1.5.4",
+    "validator": "^13.15.15"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.10"
+  }
+}
