@@ -2,7 +2,7 @@ const Cliente = require ('../models/cliente');
 //const clienteModel = require('../models/cliente');
 const clienteController = {};
 
-
+// MALILLA XD
 
 //REGISTRAR CLIENTE
 clienteController.registrarCliente = async (req, res, next) => {
