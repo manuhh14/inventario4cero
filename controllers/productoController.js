@@ -237,13 +237,15 @@ const generarYGuardarQR = async (idProducto) => {
       throw new Error('El id_producto es inválido para generar QR');
     }
 
-    const qrFolder = path.join(__dirname, '../public/codes');
+    const qrFolder = path.join(__dirname, '../uploads/qrcodes'); //<---- Cambiado a 'qrcodes' antes 'codes' 
     const qrPath = path.join(qrFolder, `qr-${idProducto}.png`);
+
+    console.log('RUTA ABSOLUTA QR:', qrPath); // <-- AÑADIR
 
     await fs.promises.mkdir(qrFolder, { recursive:true});
     await qrcode.toFile(qrPath, String(idProducto));
 
-    return `/public/qrcodes/qr-${idProducto}.png`;
+    return `/uploads/qrcodes/qr-${idProducto}.png`; //<------------------- Cambie Public por uploads
   } catch (error) {
     throw new Error(`Error generando QR: ${error.message}`);
   }
@@ -313,8 +315,10 @@ const generarYGuardarCodigoBarras = async (codigoBarras) => {
       throw new Error('El código de barras es inválido');
     }
   
-    const barcodesFolder = path.join(__dirname, '../public/barcodes');
+    const barcodesFolder = path.join(__dirname, '../uploads/barcodes'); 
     const barcodeFile = path.join(barcodesFolder, `barcode-${codigoBarras}.png`);
+
+    console.log('RUTA ABSOLUTA BARRAS:', barcodeFile); // <-- AÑADIR
 
     await fs.promises.mkdir(barcodesFolder, { recursive: true });
 
@@ -332,7 +336,7 @@ const generarYGuardarCodigoBarras = async (codigoBarras) => {
     await fs.promises.writeFile(barcodeFile, pngBuffer);
 
     // Retornar la ruta relativa para guardar en la base de datos o usar en frontend
-    return `/public/barcodes/barcode-${codigoBarras}.png`;
+    return `/uploads/barcodes/barcode-${codigoBarras}.png`;
 
   } catch (error) {
     throw new Error(`Error generando código de barras: ${error.message}`);
