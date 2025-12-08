@@ -173,8 +173,62 @@ Producto.actualizarImagen = async (id, nombreProducto, imagenProducto) => {
   return db.none(sql, [nombreProducto, imagenProducto, id]);
 };
 
+// NUEVA FUNCION: OBTENER ABC CLASIFICADO -----------------------------------------------------------------------------------
+Producto.obtenerABCClasificado = async (mes, anio) => {
+    
+    // Consulta SQL mejorada y ordenada por valor total vendido
+    const sql = `
+        SELECT 
+            p.id_producto,
+            p.nombre_producto,
+            SUM(dv.cantidad) AS cantidad_vendida,
+            SUM(dv.precio_total) AS total_vendido
+        FROM ventas v
+        INNER JOIN detalle_ventas dv ON v.id_venta = dv.id_venta
+        INNER JOIN productos p ON dv.id_producto = p.id_producto
+        WHERE EXTRACT(MONTH FROM v.fecha_venta) = $1
+          AND EXTRACT(YEAR FROM v.fecha_venta) = $2
+        GROUP BY p.id_producto, p.nombre_producto
+        ORDER BY total_vendido DESC; 
+    `;
 
+    // 1. Ejecuta la consulta
+    const datos = await db.any(sql, [mes, anio]);
 
+    // 2. TOTAL general para porcentaje
+    // *** CORRECCIÓN APLICADA: Usando 'total_vendido' del alias SQL ***
+    const totalGeneral = datos.reduce((acc, row) => acc + Number(row.total_vendido), 0); 
+
+    // Si no hay ventas, retorna vacío para evitar división por cero
+    if (totalGeneral === 0) {
+        return [];
+    }
+
+    // 3. Calcular porcentaje y acumulado
+    let acumulado = 0;
+    const clasificados = datos.map(row => {
+        // *** CORRECCIÓN APLICADA: Usando 'total_vendido' ***
+        const porcentaje = (row.total_vendido / totalGeneral) * 100;
+        acumulado += porcentaje;
+
+        let categoria = "";
+        // Reglas estándar: A <= 80%, B <= 95%, C > 95%
+        if (acumulado <= 80) categoria = "A";
+        else if (acumulado <= 95) categoria = "B";
+        else categoria = "C";
+
+        return {
+            ...row,
+            porcentaje: porcentaje.toFixed(2),
+            acumulado: acumulado.toFixed(2),
+            categoria
+        };
+    });
+
+    return clasificados;
+};
+//3
+//---------------------------------------------------------------------------------------------------------------------------
 
 module.exports = Producto;
 

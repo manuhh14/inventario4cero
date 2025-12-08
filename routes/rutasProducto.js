@@ -32,7 +32,9 @@ router.get('/eliminarPorId/:Id',productoController.eliminarPorId)
 router.put('/actualizarPorId/:id', productoController.actualizarPorId);
 router.put('/actualizarImagen/:id', upload.single('imagen'), productoController.actualizarImagen);
 
-
+// ✅ RUTA PARA CLASIFICACIÓN ABC AÑADIDA-------------------------------------------------------------------------------------------------
+router.get('/abc/:mes/:anio', productoController.obtenerABCClasificado);
+//-------------------------------------------------------------------------------
 
 
 module.exports= router;

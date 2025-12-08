@@ -237,7 +237,7 @@ const generarYGuardarQR = async (idProducto) => {
       throw new Error('El id_producto es inválido para generar QR');
     }
 
-    const qrFolder = path.join(__dirname, '../uploads/qrcodes'); //<---- Cambiado a 'qrcodes' antes 'codes' 
+    const qrFolder = path.join(__dirname, '../uploads/qrcodes'); //<---- Cambiado a "Public" por "uploads" 
     const qrPath = path.join(qrFolder, `qr-${idProducto}.png`);
 
     console.log('RUTA ABSOLUTA QR:', qrPath); // <-- AÑADIR
@@ -245,7 +245,7 @@ const generarYGuardarQR = async (idProducto) => {
     await fs.promises.mkdir(qrFolder, { recursive:true});
     await qrcode.toFile(qrPath, String(idProducto));
 
-    return `/uploads/qrcodes/qr-${idProducto}.png`; //<------------------- Cambie Public por uploads
+    return `/uploads/qrcodes/qr-${idProducto}.png`; //<------------------- Cambie "Public" por "uploads"
   } catch (error) {
     throw new Error(`Error generando QR: ${error.message}`);
   }
@@ -395,7 +395,38 @@ productoController.registrarProducto = async (req, res, next) => {
     }
 };
 
+// 🆕 NUEVA FUNCIÓN: OBTENER CLASIFICACIÓN ABC -----------------------------------------------------------------------------------------------------------------
+productoController.obtenerABCClasificado = async (req, res) => {
+    // Mes y Año se obtienen de los parámetros de la URL
+    const { mes, anio } = req.params;
 
+    try {
+        // Validar que se hayan proporcionado mes y año
+        if (!mes || !anio) {
+            return res.status(400).json({ 
+                success: false,
+                error: "Faltan los parámetros 'mes' y 'anio'."
+            });
+        }
+        
+        // Llamar a la función del modelo de Producto
+        const result = await Producto.obtenerABCClasificado(mes, anio);
 
+        // Devolver la clasificación como respuesta JSON
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        console.error('Error en controlador obtenerABCClasificado:', error);
+        res.status(500).json({
+            success: false,
+            error: "Error al obtener la clasificación ABC",
+            message: error.message
+        });
+    }
+};
+
+//------------------------------------------------------------------------------------------------------------------------------
 
 module.exports = productoController;
