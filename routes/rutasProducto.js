@@ -2,39 +2,30 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+
 const productoController = require('../controllers/productoController');
+const reporteController = require('../controllers/reporteController');
+const qrController = require('../controllers/qrController');
 
-
-
-// Configuración de Multer
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); //Esta carpeta debe de estar creada
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + path.extname(file.originalname);
+  destination: (req, file, cb) => { cb(null, 'uploads/'); },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
     cb(null, file.fieldname + '-' + uniqueSuffix);
   }
 });
-
 const upload = multer({ storage });
 
-
-
-
 // RUTAS
-
-router.get('/getAllProductos', productoController.getAllProductos);
 router.post('/registrarProducto', productoController.registrarProducto);
-router.get('/buscarPorNombre/:nombre', productoController.buscarPorNombre);
+router.get('/getAllProductos', productoController.getAllProductos);
 router.get('/buscarPorId/:Id', productoController.buscarPorId);
-router.get('/eliminarPorId/:Id',productoController.eliminarPorId)
-router.put('/actualizarPorId/:id', productoController.actualizarPorId);
 router.put('/actualizarImagen/:id', upload.single('imagen'), productoController.actualizarImagen);
+router.delete('/eliminarPorId/:Id', productoController.eliminarPorId);
 
-// ✅ RUTA PARA CLASIFICACIÓN ABC AÑADIDA-------------------------------------------------------------------------------------------------
+// REPORTES E INTELIGENCIA
 router.get('/abc/:mes/:anio', productoController.obtenerABCClasificado);
-//-------------------------------------------------------------------------------
+router.get('/reporte/pdf', reporteController.generarReporteInventario);
+router.get('/qr/:id', qrController.generarQRProducto);
 
-
-module.exports= router;
+module.exports = router;

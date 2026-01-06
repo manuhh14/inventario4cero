@@ -1,0 +1,16 @@
+[21/12/2025, 22:46:17] USUARIO: Javier_Admin | ACCIÓN: INSERT | DETALLES: Producto creado: Producto de Prueba (ID: 101)
+[21/12/2025, 22:46:58] USUARIO: Javier_Admin | ACCIÓN: INSERT | DETALLES: Producto creado: Producto de Prueba (ID: 102)
+[21/12/2025, 22:47:34] USUARIO: Javier_Admin | ACCIÓN: INSERT | DETALLES: Producto creado: Producto de Prueba (ID: 103)
+[22/12/2025, 10:15:41] USUARIO: Javier_Admin | ACCIÓN: DELETE | DETALLES: Producto eliminado permanentemente. ID afectado: 103
+[22/12/2025, 10:16:15] USUARIO: Javier_Admin | ACCIÓN: DELETE | DETALLES: Producto eliminado permanentemente. ID afectado: 101
+[22/12/2025, 10:16:27] USUARIO: Javier_Admin | ACCIÓN: DELETE | DETALLES: Producto eliminado permanentemente. ID afectado: 102
+[22/12/2025, 13:29:11] USUARIO: Javier_Admin | ACCIÓN: DELETE | DETALLES: Producto eliminado permanentemente. ID afectado: 5
+[22/12/2025, 13:39:36] USUARIO: Javier_Admin | ACCIÓN: INSERT | DETALLES: Producto creado: Laptop Gamer Pro (ID: 201)
+[22/12/2025, 13:40:51] USUARIO: Javier_Admin | ACCIÓN: INSERT | DETALLES: Producto creado: Monitor 4K Studio Display (ID: 202)
+[22/12/2025, 13:41:14] USUARIO: Javier_Admin | ACCIÓN: INSERT | DETALLES: Producto creado: Silla Ergonómica Pro (ID: 203)
+[22/12/2025, 13:41:37] USUARIO: Javier_Admin | ACCIÓN: INSERT | DETALLES: Producto creado: Teclado Inalámbrico (ID: 204)
+[22/12/2025, 13:41:58] USUARIO: Javier_Admin | ACCIÓN: INSERT | DETALLES: Producto creado: Mouse Pad XL (ID: 205)
+[22/12/2025, 13:54:13] USUARIO: Javier_Admin | ACCIÓN: DELETE | DETALLES: Producto eliminado permanentemente. ID afectado: 777
+[22/12/2025, 13:55:00] USUARIO: Javier_Admin | ACCIÓN: DELETE | DETALLES: Producto eliminado permanentemente. ID afectado: 1001
+[22/12/2025, 13:55:07] USUARIO: Javier_Admin | ACCIÓN: DELETE | DETALLES: Producto eliminado permanentemente. ID afectado: 1002
+[22/12/2025, 13:55:16] USUARIO: Javier_Admin | ACCIÓN: DELETE | DETALLES: Producto eliminado permanentemente. ID afectado: 999

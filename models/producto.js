@@ -1,41 +1,51 @@
 const db = require ('../config/config');
 
-
-//const Producto = require('../models/producto');
-
 const Producto = {};
 
+//========================================================================================================
+//  FUNCIONES CRUD BÁSICAS Y BÚSQUEDA
+//========================================================================================================
 
-//OBTENER TODOS LOS PRODUCTOS 
-
+// OBTENER TODOS LOS PRODUCTOS 
 Producto.getAll = () => {
     const sql = 'SELECT * FROM public.productos';
     return db.manyOrNone(sql);
 }
 
-
-
-//  INSERTAR DATOS A LA TABLA PRODUCTOS
-
-
-
-
+// INSERTAR DATOS A LA TABLA PRODUCTOS
+// 🛑 CORREGIDO: Usando RETURNING * y db.oneOrNone
 Producto.registrarProducto = async (datos) => {
-    const sql = 'INSERT INTO public.productos (id_producto, nombre_producto, descripcion_producto, codigo_barras, sku, precio_compra, precio_venta, precio_total, stock_actual, stock_minimo, stock_maximo, id_categoria, id_proveedor, fecha_creacion, estado, codigo_qr, imagen_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING id_producto';
-    return db.manyOrNone(sql, [datos.id_producto, datos.nombre_producto, datos.descripcion_producto, datos.codigo_barras, datos.sku, datos.precio_compra, datos.precio_venta, datos.precio_total, datos.stock_actual, datos.stock_minimo, datos.stock_maximo, datos.id_categoria,datos.id_proveedor, datos.fecha_creacion,datos.estado, datos.codigo_qr, datos.imagen_producto ]);
+    const sql = 'INSERT INTO public.productos (id_producto, nombre_producto, descripcion_producto, codigo_barras, sku, precio_compra, precio_venta, precio_total, stock_actual, stock_minimo, stock_maximo, id_categoria, id_proveedor, fecha_creacion, estado, codigo_qr, imagen_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *';
+    
+    return db.oneOrNone(sql, [
+        datos.id_producto, 
+        datos.nombre_producto, 
+        datos.descripcion_producto, 
+        datos.codigo_barras, 
+        datos.sku, 
+        datos.precio_compra, 
+        datos.precio_venta, 
+        datos.precio_total, 
+        datos.stock_actual, 
+        datos.stock_minimo, 
+        datos.stock_maximo, 
+        datos.id_categoria,
+        datos.id_proveedor, 
+        datos.fecha_creacion,
+        datos.estado, 
+        datos.codigo_qr, 
+        datos.imagen_producto // <--- $17
+    ]);
 }
 
-
-
-//BUSCAR POR NOMBRE DEL PRODUCTO
-
+// BUSCAR POR NOMBRE DEL PRODUCTO
+// 🛑 CORREGIDO: Sintaxis de placeholder segura para ILIKE
 Producto.buscarPorNombre = async (nombre) => {
   const sql = `
     SELECT * FROM productos
-    WHERE nombre_producto ILIKE '%$1:value%'
+    WHERE nombre_producto ILIKE '%' || $1 || '%'
     ORDER BY nombre_producto ASC
   `;
-
   try {
     const result = await db.any(sql, [nombre]);
     console.log('Filas obtenidas:', result);
@@ -46,17 +56,13 @@ Producto.buscarPorNombre = async (nombre) => {
   }
 };
 
-
-  
-//BUSCAR POR ID DEL PRODUCTO
-
+// BUSCAR POR ID DEL PRODUCTO
 Producto.buscarPorId = async (Id) => {
   const sql = `
     SELECT * FROM productos
     WHERE id_producto = $1
     ORDER BY id_producto ASC
   `;
-
   try {
     const result = await db.any(sql, [Id]);
     console.log('Filas obtenidas:', result);
@@ -67,16 +73,12 @@ Producto.buscarPorId = async (Id) => {
   }
 };
 
-
-
-//ELIMINAR POR ID
-
+// ELIMINAR POR ID
 Producto.eliminarPorId = async (Id) => {
   const sql = `
     DELETE FROM productos
     WHERE id_producto = $1
   `;
-
   try {
     const result = await db.result(sql, [Id]);
     console.log(`Filas eliminadas: ${result.rowCount}`);
@@ -87,8 +89,8 @@ Producto.eliminarPorId = async (Id) => {
   }
 };
 
-
-//ACTUALIZAR POR ID
+// ACTUALIZAR POR ID
+// 🛑 CORREGIDO: Se agregó 'imagen_producto'
 Producto.actualizarPorId = async (id_producto, datos) => {
   const {
     nombre_producto,
@@ -106,6 +108,7 @@ Producto.actualizarPorId = async (id_producto, datos) => {
     fecha_creacion,
     estado,
     codigo_qr,
+    imagen_producto, // 👈 AGREGADO
   } = datos;
 
   const sql = `
@@ -125,8 +128,9 @@ Producto.actualizarPorId = async (id_producto, datos) => {
       id_proveedor = $12,
       fecha_creacion = $13,
       estado = $14,
-      codigo_qr = $15
-    WHERE id_producto = $16
+      codigo_qr = $15,
+      imagen_producto = $16  -- 👈 AGREGADO
+    WHERE id_producto = $17  -- 👈 CAMBIADO DE $16 A $17
   `;
 
   const values = [
@@ -145,7 +149,8 @@ Producto.actualizarPorId = async (id_producto, datos) => {
     fecha_creacion,
     estado,
     codigo_qr,
-    id_producto,
+    imagen_producto, // 👈 AGREGADO
+    id_producto,     // 👈 POSICIÓN FINAL
   ];
 
   try {
@@ -158,11 +163,7 @@ Producto.actualizarPorId = async (id_producto, datos) => {
   }
 };
 
-
-
-
-             //SUBIR Y ACTUALIZAR IMAGEN
-
+// SUBIR Y ACTUALIZAR IMAGEN
 Producto.actualizarImagen = async (id, nombreProducto, imagenProducto) => {
   const sql = `
     UPDATE productos
@@ -173,10 +174,16 @@ Producto.actualizarImagen = async (id, nombreProducto, imagenProducto) => {
   return db.none(sql, [nombreProducto, imagenProducto, id]);
 };
 
-// NUEVA FUNCION: OBTENER ABC CLASIFICADO -----------------------------------------------------------------------------------
+//========================================================================================================
+//  FUNCIONES DE REPORTE Y ANÁLISIS (CLASIFICACIÓN ABC Y GRÁFICAS)
+//========================================================================================================
+
+// 1. FUNCION CLASIFICACIÓN ABC (Mensual)
 Producto.obtenerABCClasificado = async (mes, anio) => {
     
-    // Consulta SQL mejorada y ordenada por valor total vendido
+    const mesNum = parseInt(mes);
+    const anioNum = parseInt(anio);
+    
     const sql = `
         SELECT 
             p.id_producto,
@@ -192,44 +199,66 @@ Producto.obtenerABCClasificado = async (mes, anio) => {
         ORDER BY total_vendido DESC; 
     `;
 
-    // 1. Ejecuta la consulta
-    const datos = await db.any(sql, [mes, anio]);
+    try {
+        const datos = await db.any(sql, [mesNum, anioNum]);
 
-    // 2. TOTAL general para porcentaje
-    // *** CORRECCIÓN APLICADA: Usando 'total_vendido' del alias SQL ***
-    const totalGeneral = datos.reduce((acc, row) => acc + Number(row.total_vendido), 0); 
+        const totalGeneral = datos.reduce((acc, row) => acc + Number(row.total_vendido), 0); 
 
-    // Si no hay ventas, retorna vacío para evitar división por cero
-    if (totalGeneral === 0) {
-        return [];
+        if (totalGeneral === 0) {
+            return [];
+        }
+
+        let acumulado = 0;
+        const clasificados = datos.map(row => {
+            const porcentaje = (Number(row.total_vendido) / totalGeneral) * 100;
+            acumulado += porcentaje;
+
+            let categoria = "";
+            if (acumulado <= 80) categoria = "A";
+            else if (acumulado <= 95) categoria = "B";
+            else categoria = "C";
+
+            return {
+                ...row,
+                porcentaje: porcentaje.toFixed(2),
+                acumulado: acumulado.toFixed(2),
+                categoria_abc: categoria 
+            };
+        });
+
+        return clasificados;
+
+    } catch (error) {
+        console.error('Error al obtener clasificación ABC:', error.message || error);
+        throw error;
     }
-
-    // 3. Calcular porcentaje y acumulado
-    let acumulado = 0;
-    const clasificados = datos.map(row => {
-        // *** CORRECCIÓN APLICADA: Usando 'total_vendido' ***
-        const porcentaje = (row.total_vendido / totalGeneral) * 100;
-        acumulado += porcentaje;
-
-        let categoria = "";
-        // Reglas estándar: A <= 80%, B <= 95%, C > 95%
-        if (acumulado <= 80) categoria = "A";
-        else if (acumulado <= 95) categoria = "B";
-        else categoria = "C";
-
-        return {
-            ...row,
-            porcentaje: porcentaje.toFixed(2),
-            acumulado: acumulado.toFixed(2),
-            categoria
-        };
-    });
-
-    return clasificados;
 };
-//3
+
+// 2. FUNCION TOTAL VENDIDO POR MES (Gráficas de Tendencia)
+Producto.obtenerTotalVendidoPorMes = async (anio) => {
+    
+    const anioNum = parseInt(anio);
+    
+    const sql = `
+        SELECT 
+            EXTRACT(MONTH FROM v.fecha_venta) AS mes,
+            SUM(dv.precio_total) AS total_vendido
+        FROM ventas v
+        INNER JOIN detalle_ventas dv ON dv.id_venta = v.id_venta
+        WHERE EXTRACT(YEAR FROM v.fecha_venta) = $1
+        GROUP BY mes
+        ORDER BY mes;
+    `;
+
+    try {
+        const resultados = await db.any(sql, [anioNum]);
+        return resultados;
+    } catch (error) {
+        console.error('Error al obtener el total vendido por mes:', error.message || error);
+        throw error;
+    }
+};
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 module.exports = Producto;
-
-

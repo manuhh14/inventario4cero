@@ -1,33 +1,27 @@
 const promise = require('bluebird');
+const pgpLib = require('pg-promise');
 
-// Configuración pg-promise
-const options = {
-  promiseLib: promise,
-  query: (e) => {
-    console.log('Consulta ejecutada:', e.query);
-    console.log('Parámetros:', e.params);
-  },
+const pgp = pgpLib({ promiseLib: promise });
+
+const cn = {
+    // La URL debe terminar en ?ssl=true
+    connectionString: 'postgresql://inventario_666p_user:FH8EPWjRBjl1W4bu1nNSxkiobxAvCpPS@dpg-d4j1q27diees738fj7h0-a.oregon-postgres.render.com/inventario_666p?ssl=true',
+    ssl: { rejectUnauthorized: false },
+    max: 1, // Solo una conexión para no saturar el plan free
+    connectionTimeoutMillis: 10000, // 10 segundos para conectar
+    query_timeout: 10000
 };
 
-const pgpLib = require('pg-promise');
-const pgp = pgpLib(options);
+const db = pgp(cn);
 
-const types = pgp.pg.types;
-types.setTypeParser(1114, (stringValue) => stringValue);
-
-//URL EXTERNA DE RENDER (con SSL)
-const DB_URL = 'postgresql://inventario_666p_user:FH8EPWjRBjl1W4bu1nNSxkiobxAvCpPS@dpg-d4j1q27diees738fj7h0-a.oregon-postgres.render.com/inventario_666p?ssl=true';
-
-const db = pgp(DB_URL);
-
-// Probar conexión
+// Esto probará la conexión una sola vez al iniciar
 db.connect()
-  .then(obj => {
-    console.log(' Conectado exitosamente a Render PostgreSQL');
-    obj.done();
-  })
-  .catch(error => {
-    console.error(' ERROR al conectar a Render:', error);
-  });
+    .then(obj => {
+        console.log('✅ CONECTADO A RENDER EXITOSAMENTE');
+        obj.done(); 
+    })
+    .catch(error => {
+        console.error('❌ ERROR DE CONEXIÓN A BASE DE DATOS:', error.message);
+    });
 
 module.exports = db;
