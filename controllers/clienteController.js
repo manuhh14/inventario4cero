@@ -3,7 +3,6 @@ const Cliente = require ('../models/cliente');
 const clienteController = {};
 
 
-
 //REGISTRAR CLIENTE
 clienteController.registrarCliente = async (req, res, next) => {
     try {

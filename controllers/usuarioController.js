@@ -1,185 +1,149 @@
-const Usuario = require ('../models/usuario');
-//const clienteModel = require('../models/cliente');
+const Usuario = require('../models/usuario');
 const usuarioController = {};
 
-
-
-//REGISTRAR USUARIO
- usuarioController.registrarUsuario = async (req, res, next) => {
-     try {
-         const usuario = req.body;
-         console.log("Usuario recibido:", usuario);
-
-         if (!usuario.nombre_usuario ||
-             !usuario.telefono_usuario ||
-             !usuario.email_usuario ||
-             !usuario.password ||
-             !usuario.rol) {
-
-                 return res.status(400).json({
-                     success: false,
-                     message: "Falta campos requeridos",
-                 });
-             }
-
-             const nuevoUsuario = await Usuario.registrarUsuario(usuario);
-
-             return res.status (201).json({
-                 success: true,
-                 message:"Usuario registrado correctamente",
-                 data: nuevoUsuario
-             });
-     } catch (error) {
-         console.error(error);
-         return res.status(500).json({
-             success: false,
-             message:"Error al registrar usuario",
-             error: error.message
-         });
-     }
- };
-
-
-
-
-
-//OBTENER TODOS LOS USUARIOS
- usuarioController.getAllUsuario = async (req, res) => {
-      try {
-          const usuarios = await Usuario.getAll();
-          res.status(200).json(usuarios);
-      } catch (error) {
-          console.error(error);
-          res.status(500).json({ message:"Error al obtener usuarios"});
-      }
-  };
-
-
-
-
-// BUSCAR POR NOMBRE DEL CLIENTE
-  usuarioController.buscarPorNombre = async (req, res) => {
+/**
+ * ✅ REGISTRAR USUARIO
+ * Valida que todos los campos requeridos por la App estén presentes.
+ */
+usuarioController.registrarUsuario = async (req, res) => {
     try {
-      const { nombre } = req.params;
-      console.log('Nombre recibido:', nombre);
+        const usuario = req.body;
 
-      if (!nombre) {
-        return res.status(400).json({ success: false, message: 'Nombre requerido' });
-      }
+        // Validación estricta de campos obligatorios para el APK
+        const camposRequeridos = ['nombre_usuario', 'telefono_usuario', 'email_usuario', 'password', 'rol'];
+        const faltantes = camposRequeridos.filter(campo => !usuario[campo]);
 
-      const resultados = await   Usuario.buscarPorNombre(nombre);
-    
-      if (resultados.length === 0) {
-        return res.status(200).json({ 
-          success: true, 
-          message: "No se encontraron usuarios", 
-          data: [] 
+        if (faltantes.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Faltan campos obligatorios: ${faltantes.join(', ')}`
+            });
+        }
+
+        const nuevoUsuario = await Usuario.registrarUsuario(usuario);
+
+        return res.status(201).json({
+            success: true,
+            message: "Usuario registrado correctamente",
+            data: nuevoUsuario
         });
-      }
-
-      return res.status(200).json({ success: true, data: resultados });
-
     } catch (error) {
-      console.error('Error en controlador:', error.message);
-      return res.status(500).json({ 
-        success: false, 
-        message: 'Error interno del servidor',
-        error: error.message 
-      });
-    }
-  };
-
-
-
-
-
-//BUSCAR POR ID DEL USUARIO
-
-  usuarioController.buscarPorId = async (req, res) => {
-    try {
-      const { Id } = req.params;
-      console.log('Id recibido:', Id);
-
-      if (!Id) {
-        return res.status(400).json({ success: false, message: 'Id requerido' });
-      }
-
-      const resultados = await Usuario.buscarPorId(Id);
-    
-      if (resultados.length === 0) {
-        return res.status(200).json({ 
-          success: true, 
-          message: "No se encontró Id", 
-          data: [] 
+        return res.status(500).json({
+            success: false,
+            message: "Error interno al registrar usuario",
+            error: error.message
         });
-      }
-
-      return res.status(200).json({ success: true, data: resultados });
-
-    } catch (error) {
-      console.error('Error en controlador:', error.message);
-      return res.status(500).json({ 
-        success: false, 
-        message: 'Error interno del servidor',
-        error: error.message 
-      });
     }
-  };
+};
 
-
-
-
-//ELIMINAR POR ID
-  usuarioController.eliminarPorId = async (req, res) => {
+/**
+ * ✅ OBTENER TODOS LOS USUARIOS
+ */
+usuarioController.getAllUsuario = async (req, res) => {
     try {
-      const { Id } = req.params;
-      console.log('Id recibido para eliminar:', Id);
-
-      if (!Id) {
-        return res.status(400).json({ success: false, message: 'Id requerido para eliminar'});
-      }
-      const filasEliminadas = await Usuario.eliminarPorId(Id);
-
-      if (filasEliminadas === 0) {
-        return res.status(400).json({ success: false, message: 'No se encontró usuario con ese Id'});
-      }
-      return res.status(200).json({ success: true, message: 'Usuario eliminado correctamente'});
+        const usuarios = await Usuario.getAll();
+        return res.status(200).json({
+            success: true,
+            data: usuarios
+        });
     } catch (error) {
-      console.error('Error en controlador al eliminar:', error.mesaage);
-      return res.status(500).json({
-        success: false,
-        message: 'Error interno del servidor al eliminar',
-        error: error.message
-      });
+        return res.status(500).json({ 
+            success: false,
+            message: "Error al obtener la lista de usuarios" 
+        });
     }
-  };
+};
 
-
-
-
-//ACTUALIZAR POR ID
-  usuarioController.actualizarPorId = async (req, res) => {
-    const id_usuario = req.params.id;
-    const datos = req.body;
-
-    if (!id_usuario) {
-      return res.status(400).json({ message: 'El id_usuario es requerido' });
-    }
-
+/**
+ * ✅ BUSCAR POR ID
+ * Soporta variaciones de mayúsculas/minúsculas en el parámetro de la URL.
+ */
+usuarioController.buscarPorId = async (req, res) => {
     try {
-      const filasActualizadas = await Usuario.actualizarPorId(id_usuario, datos);
+        const idBusqueda = req.params.Id || req.params.id;
 
-      if (filasActualizadas === 0) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
-      }
+        if (!idBusqueda) {
+            return res.status(400).json({ success: false, message: 'ID de usuario requerido' });
+        }
 
-      res.json({ message: 'Usuario actualizado correctamente' });
+        const resultado = await Usuario.buscarPorId(idBusqueda);
+
+        if (!resultado || (Array.isArray(resultado) && resultado.length === 0)) {
+            return res.status(404).json({
+                success: false,
+                message: "Usuario no encontrado"
+            });
+        }
+
+        return res.status(200).json({ 
+            success: true, 
+            data: Array.isArray(resultado) ? resultado[0] : resultado 
+        });
+
     } catch (error) {
-      console.error('Error en controlador actualizarPorId:', error);
-      res.status(500).json({ message: 'Error al actualizar el usuario' });
+        return res.status(500).json({
+            success: false,
+            message: 'Error al buscar usuario por ID',
+            error: error.message
+        });
     }
-  };
+};
 
+/**
+ * ✅ ACTUALIZAR POR ID
+ */
+usuarioController.actualizarPorId = async (req, res) => {
+    try {
+        const idActualizar = req.params.id || req.params.Id;
+        const datos = req.body;
 
+        if (!idActualizar) {
+            return res.status(400).json({ success: false, message: 'ID requerido para actualizar' });
+        }
+
+        const filasActualizadas = await Usuario.actualizarPorId(idActualizar, datos);
+
+        if (filasActualizadas === 0) {
+            return res.status(404).json({ success: false, message: 'No se encontró el usuario para actualizar' });
+        }
+
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Usuario actualizado correctamente' 
+        });
+    } catch (error) {
+        return res.status(500).json({ 
+            success: false,
+            message: 'Error al actualizar el usuario' 
+        });
+    }
+};
+
+/**
+ * ✅ ELIMINAR POR ID
+ */
+usuarioController.eliminarPorId = async (req, res) => {
+    try {
+        const idEliminar = req.params.Id || req.params.id;
+
+        if (!idEliminar) {
+            return res.status(400).json({ success: false, message: 'ID requerido para eliminar' });
+        }
+        
+        const filasEliminadas = await Usuario.eliminarPorId(idEliminar);
+
+        if (filasEliminadas === 0) {
+            return res.status(404).json({ success: false, message: 'No se encontró el usuario' });
+        }
+        
+        return res.status(200).json({ success: true, message: 'Usuario eliminado correctamente' });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Error interno al intentar eliminar',
+            error: error.message
+        });
+    }
+};
 
 module.exports = usuarioController;

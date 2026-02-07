@@ -2,17 +2,19 @@ const express = require('express');
 const router = express.Router();
 const ventaController = require('../controllers/ventaController');
 
+/**
+ * ✅ RUTAS DE VENTAS
+ * Sincronizadas con el controlador de Ventas optimizado.
+ */
 
-
-
-// RUTAS
-
+// Registrar una nueva transacción desde el APK
 router.post('/registrarVenta', ventaController.registrarVenta);
+
+// Obtener el historial completo para la pantalla de "Ventas" de la App
 router.get('/getAllVenta', ventaController.getAllVenta);
-// router.get('/buscarPorNombre/:nombre', usuarioController.buscarPorNombre);
-// router.get('/buscarPorId/:Id', usuarioController.buscarPorId);
-// router.get('/eliminarPorId/:Id',usuarioController.eliminarPorId);
-// router.put('/actualizarPorId/:id', usuarioController.actualizarPorId);
 
+// Eliminar una venta específica por su ID
+// Usamos DELETE por ser el estándar profesional
+router.delete('/eliminarVenta/:Id', ventaController.eliminarVenta);
 
-module.exports= router;
+module.exports = router;
