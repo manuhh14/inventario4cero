@@ -1,11 +1,10 @@
 const express = require('express');
 const app = express();
 const http = require('http');
-const server = http.createServer(app); 
+const server = http.createServer(app);
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs'); 
-
+const fs = require('fs');
 
 // 📚 IMPORTACIÓN DE SWAGGER
 const swaggerUi = require('swagger-ui-express');
@@ -23,7 +22,7 @@ const venta = require('./routes/rutasVenta');
 const estadisticas = require('./routes/rutasEstadisticas');
 
 // ====================================================================
-// 2. CONFIGURACIÓN DE SWAGGER
+// 2. CONFIGURACIÓN DE SWAGGER (CON PLANTILLAS PREDETERMINADAS)
 // ====================================================================
 const swaggerOptions = {
     definition: {
@@ -46,7 +45,9 @@ const swaggerOptions = {
                         nombre_producto: { type: 'string', example: 'Llave Hexagonal 1/2' },
                         precio_venta: { type: 'number', example: 85.50 },
                         stock_actual: { type: 'integer', example: 50 },
-                        sku: { type: 'string', example: 'SKU-789-ABC' }
+                        sku: { type: 'string', example: 'SKU-789-ABC' },
+                        codigo_barras: { type: 'string', example: '750123456789' },
+                        estado: { type: 'string', example: 'ACTIVO' }
                     }
                 }
             }
@@ -70,11 +71,14 @@ const swaggerOptions = {
                                 schema: {
                                     type: 'object',
                                     properties: {
-                                        id_producto: { type: 'string' },
-                                        nombre_producto: { type: 'string' },
-                                        precio_venta: { type: 'number' },
-                                        stock_actual: { type: 'integer' },
-                                        id_categoria: { type: 'integer' }
+                                        id_producto: { type: 'string', example: '000' },
+                                        nombre_producto: { type: 'string', example: 'Nuevo Producto' },
+                                        precio_venta: { type: 'number', example: 100.0 },
+                                        stock_actual: { type: 'integer', example: 10 },
+                                        id_categoria: { type: 'integer', example: 1 },
+                                        codigo_barras: { type: 'string', example: '750000000000' },
+                                        sku: { type: 'string', example: 'SKU-TEMP-000' },
+                                        estado: { type: 'string', example: 'ACTIVO' }
                                     }
                                 }
                             }
@@ -126,7 +130,7 @@ const swaggerOptions = {
             }
         }
     },
-    apis: [], // IMPORTANTE: Dejar vacío para evitar errores de duplicidad con rutasProducto.js
+    apis: [],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
@@ -135,7 +139,7 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 // 3. MIDDLEWARES
 // ====================================================================
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
@@ -171,5 +175,5 @@ app.use('/api/estadisticas', estadisticas);
 // ====================================================================
 const port = 3000;
 server.listen(port, '0.0.0.0', () => {
-  console.log(`🚀 API lista en http://localhost:${port}/api-docs`);
+    console.log(`🚀 API lista en http://localhost:${port}/api-docs`);
 });
